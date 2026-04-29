@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Company Research Tool</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.5px;
+    }
+    .header h1 span { color: #3b82f6; }
+    .header p {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #94a3b8;
+      max-width: 520px;
+    }
+
+    /* ── Card ───────────────────────────────────────── */
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    /* ── Input row ──────────────────────────────────── */
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .input-group input {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-size: 1rem;
+      color: #f1f5f9;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input::placeholder { color: #64748b; }
+    .input-group input:focus { border-color: #3b82f6; }
+
+    .btn-research {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 22px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-research:hover  { background: #2563eb; }
+    .btn-research:active { transform: scale(0.97); }
+    .btn-research:disabled { background: #475569; cursor: not-allowed; }
+
+    /* ── Progress area ──────────────────────────────── */
+    #progress-area { display: none; }
+
+    .step-label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      min-height: 22px;
+    }
+
+    .progress-bar-bg {
+      background: #0f172a;
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      transition: width 0.6s ease;
+      width: 0%;
+    }
+
+    /* Step list */
+    .steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: #64748b;
+      transition: color 0.3s;
+    }
+    .step.active  { color: #e2e8f0; }
+    .step.done    { color: #4ade80; }
+    .step .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #334155;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .step.active .dot { background: #3b82f6; animation: pulse 1.2s infinite; }
+    .step.done   .dot { background: #4ade80; }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.4; }
+    }
+
+    /* ── Result ──────────────────────────────────────── */
+    #result-area { display: none; margin-top: 20px; }
+
+    .result-box {
+      background: #0f172a;
+      border: 1px solid #22c55e;
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: center;
+    }
+    .result-box .score {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #3b82f6;
+      line-height: 1;
+    }
+    .result-box .score-label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .result-box .company-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin: 12px 0 6px;
+    }
+    .result-box .quality-label {
+      font-size: 0.88rem;
+      color: #4ade80;
+      margin-bottom: 16px;
+    }
+
+    .btn-download {
+      display: inline-block;
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-download:hover { background: #16a34a; }
+
+    .btn-new {
+      display: block;
+      margin-top: 12px;
+      background: transparent;
+      color: #64748b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      width: 100%;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-new:hover { color: #e2e8f0; border-color: #64748b; }
+
+    /* ── Error ───────────────────────────────────────── */
+    #error-area { display: none; margin-top: 16px; }
+    .error-box {
+      background: #450a0a;
+      border: 1px solid #dc2626;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      color: #fca5a5;
+    }
+
+    /* ── Footer ──────────────────────────────────────── */
+    .footer {
+      margin-top: 40px;
+      font-size: 0.78rem;
+      color: #475569;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Company <span>Research</span> Tool</h1>
+    <p>Enter a company name and receive a full investment quality assessment — moat, compounding capability, fragility, and a 10-point scorecard — as a Word document.</p>
+  </div>
+
+  <div class="card">
+
+    <!-- Input -->
+    <div class="input-group">
+      <input
+        id="company-input"
+        type="text"
+        placeholder="e.g. Constellation Software, LVMH, Copart…"
+        autocomplete="off"
+      />
+      <button class="btn-research" id="research-btn" onclick="startResearch()">
+        Research →
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div id="progress-area">
+      <div class="step-label" id="step-label">Starting…</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <ul class="steps" id="steps-list">
+        <li class="step" data-min="5"  data-max="19">  <span class="dot"></span> Gathering company overview &amp; financials</li>
+        <li class="step" data-min="20" data-max="34">  <span class="dot"></span> Researching competitive position &amp; moat</li>
+        <li class="step" data-min="35" data-max="54">  <span class="dot"></span> Evaluating growth runway &amp; model</li>
+        <li class="step" data-min="55" data-max="74">  <span class="dot"></span> Assessing fragility &amp; risks</li>
+        <li class="step" data-min="75" data-max="89">  <span class="dot"></span> Scoring tenets &amp; compiling analysis</li>
+        <li class="step" data-min="90" data-max="100"> <span class="dot"></span> Generating Word report</li>
+      </ul>
+    </div>
+
+    <!-- Result -->
+    <div id="result-area">
+      <div class="result-box">
+        <div class="company-name" id="result-company">—</div>
+        <div class="score" id="result-score">—</div>
+        <div class="score-label">Overall Quality Score (out of 10)</div>
+        <div class="quality-label" id="result-label">—</div>
+        <a class="btn-download" id="download-link" href="#" download>
+          ⬇ Download Report (.docx)
+        </a>
+      </div>
+      <button class="btn-new" onclick="resetForm()">Research another company</button>
+    </div>
+
+    <!-- Error -->
+    <div id="error-area">
+      <div class="error-box" id="error-message">An error occurred.</div>
+      <button class="btn-new" style="margin-top:10px" onclick="resetForm()">Try again</button>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Powered by Claude (Anthropic) · Tavily Search · Research takes ~2–4 minutes
+  </div>
+
+  <script>
+    let currentJobId   = null;
+    let eventSource    = null;
+    let pollInterval   = null;
+
+    function startResearch() {
+      const company = document.getElementById("company-input").value.trim();
+      if (!company) {
+        document.getElementById("company-input").focus();
+        return;
+      }
+
+      // UI state: researching
+      document.getElementById("research-btn").disabled = true;
+      document.getElementById("company-input").disabled = true;
+      document.getElementById("progress-area").style.display = "block";
+      document.getElementById("result-area").style.display   = "none";
+      document.getElementById("error-area").style.display    = "none";
+      resetSteps();
+
+      fetch("/api/research", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ company })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.job_id) {
+          currentJobId = data.job_id;
+          connectSSE(data.job_id);
+        } else {
+          showError("Failed to start research. Check server logs.");
+        }
+      })
+      .catch(err => showError(err.message));
+    }
+
+    function connectSSE(jobId) {
+      // Try SSE first; fall back to polling if it fails quickly
+      let sseWorking = false;
+
+      eventSource = new EventSource(`/api/stream/${jobId}`);
+
+      eventSource.onopen = () => { sseWorking = true; };
+
+      eventSource.onmessage = (e) => {
+        sseWorking = true;
+        try {
+          const event = JSON.parse(e.data);
+          handleEvent(event);
+        } catch (_) { /* ignore ping/malformed */ }
+      };
+
+      eventSource.onerror = () => {
+        if (!sseWorking) {
+          // SSE never connected — fall back to polling
+          eventSource.close();
+          startPolling(jobId);
+        }
+      };
+    }
+
+    function startPolling(jobId) {
+      pollInterval = setInterval(() => {
+        fetch(`/api/status/${jobId}`)
+          .then(r => r.json())
+          .then(data => {
+            updateProgress(data.message, data.progress_pct);
+            if (data.status === "complete") {
+              clearInterval(pollInterval);
+              showResult(data.download_url, null, null, null);
+            } else if (data.status === "error") {
+              clearInterval(pollInterval);
+              showError(data.error || "Unknown error");
+            }
+          })
+          .catch(() => {}); // silent retry
+      }, 2000);
+    }
+
+    function handleEvent(event) {
+      if (event.type === "progress" || event.type === "ping") {
+        if (event.type === "progress") updateProgress(event.message, event.pct);
+        return;
+      }
+      if (event.type === "complete") {
+        eventSource && eventSource.close();
+        showResult(event.download_url, event.company, event.score, event.label);
+        return;
+      }
+      if (event.type === "error") {
+        eventSource && eventSource.close();
+        showError(event.message || "Research failed.");
+        return;
+      }
+    }
+
+    function updateProgress(message, pct) {
+      document.getElementById("step-label").textContent  = message || "Working…";
+      document.getElementById("progress-fill").style.width = (pct || 0) + "%";
+      updateSteps(pct || 0);
+    }
+
+    function updateSteps(pct) {
+      document.querySelectorAll("#steps-list .step").forEach(step => {
+        const min = parseInt(step.dataset.min);
+        const max = parseInt(step.dataset.max);
+        if (pct > max) {
+          step.classList.remove("active");
+          step.classList.add("done");
+        } else if (pct >= min) {
+          step.classList.remove("done");
+          step.classList.add("active");
+        } else {
+          step.classList.remove("active", "done");
+        }
+      });
+    }
+
+    function showResult(downloadUrl, company, score, label) {
+      document.getElementById("progress-area").style.display = "none";
+      document.getElementById("result-area").style.display   = "block";
+
+      if (company) document.getElementById("result-company").textContent = company;
+      if (score   !== null && score !== undefined) document.getElementById("result-score").textContent = score;
+      if (label)  document.getElementById("result-label").textContent   = label;
+
+      const link = document.getElementById("download-link");
+      link.href = downloadUrl;
+      // Force download via fetch (avoids browser opening the file)
+      link.onclick = (e) => {
+        e.preventDefault();
+        fetch(downloadUrl)
+          .then(r => r.blob())
+          .then(blob => {
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement("a");
+            a.href     = url;
+            a.download = `${company || "Company"} Research Report.docx`;
+            a.click();
+            URL.revokeObjectURL(url);
+          });
+      };
+    }
+
+    function showError(message) {
+      document.getElementById("progress-area").style.display = "none";
+      document.getElementById("error-area").style.display    = "block";
+      document.getElementById("error-message").textContent   = "Error: " + message;
+      document.getElementById("research-btn").disabled       = false;
+      document.getElementById("company-input").disabled      = false;
+    }
+
+    function resetForm() {
+      currentJobId = null;
+      if (eventSource)   { eventSource.close();       eventSource  = null; }
+      if (pollInterval)  { clearInterval(pollInterval); pollInterval = null; }
+
+      document.getElementById("company-input").value    = "";
+      document.getElementById("company-input").disabled = false;
+      document.getElementById("research-btn").disabled  = false;
+      document.getElementById("progress-area").style.display = "none";
+      document.getElementById("result-area").style.display   = "none";
+      document.getElementById("error-area").style.display    = "none";
+      document.getElementById("progress-fill").style.width   = "0%";
+      document.getElementById("step-label").textContent      = "Starting…";
+      resetSteps();
+      document.getElementById("company-input").focus();
+    }
+
+    function resetSteps() {
+      document.querySelectorAll("#steps-list .step").forEach(s => {
+        s.classList.remove("active", "done");
+      });
+    }
+
+    // Allow Enter key to submit
+    document.getElementById("company-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") startResearch();
+    });
+  </script>
+</body>
+</html>
