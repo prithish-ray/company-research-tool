@@ -261,7 +261,7 @@ def run_research(
     progress_callback: Callable[[str, int], None] | None = None
 ) -> dict:
     """
-    Research a company using Groq (meta-llama/llama-prompt-guard-2-86m) + Tavily.
+    Research a company using Groq (openai/gpt-oss-120b) + Tavily.
 
     progress_callback(message, pct) is called at each stage.
     Returns the research data as a dict.
@@ -302,12 +302,12 @@ def run_research(
     for _ in range(MAX_ITERATIONS):
 
         response = client.chat.completions.create(
-            model="meta-llama/llama-prompt-guard-2-86m",
+            model="openai/gpt-oss-120b",
             messages=messages,
             tools=GROQ_TOOLS,
             tool_choice="auto",
             temperature=0.2,
-            max_tokens=15000,
+            max_tokens=8000,
         )
 
         message = response.choices[0].message
