@@ -307,7 +307,7 @@ def run_research(
             tools=GROQ_TOOLS,
             tool_choice="auto",
             temperature=0.2,
-            max_tokens=8192,
+            max_tokens=15000,
         )
 
         message = response.choices[0].message
