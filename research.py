@@ -261,7 +261,7 @@ def run_research(
     progress_callback: Callable[[str, int], None] | None = None
 ) -> dict:
     """
-    Research a company using Groq (llama-3.3-70b-versatile) + Tavily.
+    Research a company using Groq (meta-llama/llama-prompt-guard-2-86m) + Tavily.
 
     progress_callback(message, pct) is called at each stage.
     Returns the research data as a dict.
@@ -302,7 +302,7 @@ def run_research(
     for _ in range(MAX_ITERATIONS):
 
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="meta-llama/llama-prompt-guard-2-86m",
             messages=messages,
             tools=GROQ_TOOLS,
             tool_choice="auto",
